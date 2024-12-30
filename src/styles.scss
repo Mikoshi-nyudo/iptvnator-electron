@@ -1,0 +1,134 @@
+// @import 'themes/';
+@import '@yangkghjh/videojs-aspect-ratio-panel/dist/videojs-aspect-ratio-panel.css';
+
+body,
+html {
+    user-select: none;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+@media (display-mode: standalone) {
+    body {
+        overscroll-behavior-y: contain;
+        overflow: hidden;
+    }
+}
+
+.mat-toolbar.mat-primary {
+    background: #000;
+    color: #b8b8b8;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.mat-toolbar-row,
+.mat-toolbar-single-row {
+    height: 54px;
+}
+
+.mat-tab-label-active {
+    opacity: 1 !important;
+}
+
+input,
+button,
+textarea,
+:focus {
+    outline: none;
+}
+
+/* .dark-theme .mat-expansion-panel,
+.dark-theme .mat-drawer,
+.dark-theme .mat-app-background,
+.dark-theme.mat-app-background {
+    background-color: #1d1d1d;
+} */
+
+.dark-theme {
+    ::-webkit-scrollbar {
+        overflow-y: scroll;
+        background: #1d1d1d;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: rgb(60 60 60);
+        border-radius: 10px;
+    }
+}
+
+.mb-10 {
+    margin-bottom: 10px;
+}
+
+.about-dialog-overlay {
+    .mat-mdc-dialog-surface {
+        text-align: center;
+        background: black !important;
+        color: #fff !important;
+        padding: 10px;
+    }
+}
+
+.cet-container {
+    .video-js {
+        height: calc(100vh - 93px) !important;
+    }
+
+    app-web-player-view > app-vjs-player > .video-js {
+        height: 100% !important;
+    }
+
+    #video-player {
+        width: 100%;
+        height: calc(100vh - 80px) !important;
+    }
+
+    .recent-playlists {
+        height: calc(100vh - 106px - 28px) !important;
+    }
+
+    #groups-list,
+    #favorites-list {
+        height: calc(100vh - 148px) !important;
+    }
+
+    .scroll-viewport {
+        min-height: calc(100vh - 210px) !important;
+    }
+
+    .scroll-viewport-portals {
+        min-height: calc(100vh - 170px) !important;
+        overflow-x: hidden !important;
+    }
+}
+
+.scroll-viewport-portals {
+    min-height: calc(100vh - 170px) !important;
+    overflow-x: hidden !important;
+}
+
+.mat-drawer-inner-container {
+    overflow: hidden !important;
+}
+
+@media only screen and (max-width: 599px) {
+    .cet-container {
+        .video-js {
+            height: calc(50vh - 70px) !important;
+        }
+
+        #video-player {
+            height: calc(50vh - 80px) !important;
+        }
+
+        .scroll-viewport {
+            min-height: calc(50vh - 159px) !important
+        }
+    }
+
+}

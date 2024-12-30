@@ -1,0 +1,71 @@
+// .jwplayer-wrapper {
+//     position: relative;
+//     width: 100%;
+//     height: 100%;
+//     display: flex;
+//     flex-direction: column;
+//     overflow: hidden;
+// }
+
+// #jwplayer {
+//     position: relative !important;
+//     width: 100% !important;
+//     flex: 1;
+//     min-height: 0; /* Important for flex sizing */
+// }
+
+// /* Ensure minimum height for controls visibility */
+// @media only screen and (max-height: 500px) {
+//     #jwplayer {
+//         min-height: 300px;
+//     }
+// }
+
+// /* Adjust player for smaller screens */
+// @media only screen and (max-width: 599px) {
+//     .jwplayer-wrapper {
+//         height: 50vh;
+//     }
+// }
+
+// #jwplayer {
+//     position: relative;
+//     width: 100%;
+//     height: calc(100vh - 65px);
+// }
+
+// @media only screen and (max-width: 599px) {
+//     #jwplayer {
+//         height: calc(50vh - 65px) !important;
+//     }
+// }
+
+#jwplayer {
+    position: relative !important;
+    width: 100% !important;
+    height: calc(100vh - 130px) !important;
+}
+
+@media only screen and (max-width: 599px) {
+    #jwplayer {
+        height: calc(50vh - 65px) !important;
+    }
+}
+
+
+
+/* Style the "Live" button */
+.jw-text-live:not(.jw-dvr-live) {
+    background-color: red !important;
+    color: white !important;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+/* Style the "Not Live" button */
+.jw-text-live.jw-dvr-live {
+    background-color: grey !important;
+    color: white !important;
+    font-weight: normal;
+    border-radius: 4px;
+}

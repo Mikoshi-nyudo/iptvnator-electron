@@ -1,0 +1,11 @@
+.clapprplayer {
+    position: relative !important;
+    width: 100% !important;
+    height: calc(100vh - 130px);
+}
+
+@media only screen and (max-width: 599px) {
+    .clapprplayer {
+        height: calc(50vh - 65px) !important;
+    }
+}

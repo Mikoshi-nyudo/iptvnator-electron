@@ -1,0 +1,31 @@
+.channel-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    font-size: 0.9em;
+    max-width: 290px;
+}
+
+.active {
+    background: #ddd;
+}
+
+::ng-deep {
+    .dark-theme {
+        .active {
+            background: #000;
+        }
+    }
+}
+
+.drag-icon {
+    cursor: move;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.channel-logo {
+    object-fit: contain;
+}

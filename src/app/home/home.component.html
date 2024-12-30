@@ -1,0 +1,8 @@
+<div class="grid-container">
+    <app-header
+        [title]="'HOME.TITLE' | translate"
+        [subtitle]="'HOME.SUBTITLE' | translate"
+    />
+    <app-recent-playlists class="recent-playlists" />
+    <mat-progress-bar *ngIf="isLoading" mode="indeterminate" />
+</div>

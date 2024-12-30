@@ -1,0 +1,26 @@
+<div
+    class="file-upload"
+    appDragDropFileUpload
+    (click)="fileField.click()"
+    (fileDropped)="upload($event)"
+>
+    <mat-icon class="upload-icon">upload_file</mat-icon>
+    <span class="label"
+        >{{
+            ('HOME.FILE_UPLOAD.DRAG_DROP' | translate) +
+                ' ' +
+                ('HOME.FILE_UPLOAD.OR' | translate)
+        }}
+        <br />
+        {{ 'HOME.FILE_UPLOAD.CHOOSE_PLAYLIST' | translate }}</span
+    >
+    <input
+        type="file"
+        name="playlist"
+        #fileField
+        (change)="upload($any($event).target.files)"
+        accept=".m3u,.m3u8"
+        hidden
+        multiple
+    />
+</div>
