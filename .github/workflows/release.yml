@@ -4,11 +4,21 @@ on:
     tags:
       - v*
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g., v1.0.0)'
+        required: true
+        default: 'v0.0.0'
+      release_name:
+        description: 'Release name'
+        required: false
+        default: 'Manual Release'
+
 permissions:
   contents: write
   packages: write
 jobs:
-  package:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -29,53 +39,68 @@ jobs:
           npm ci
           npm run build
           
-      # Build and upload artifacts for each platform
-      - name: Build and upload - Windows
+      # Build for each platform with specific configurations
+      - name: Build - Windows
         if: startsWith(matrix.os, 'windows')
         run: npx electron-builder --windows --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Build and upload - macOS
+      - name: Build - macOS
         if: startsWith(matrix.os, 'macos')
         run: npx electron-builder --mac --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Build and upload - Linux
+      - name: Build - Linux
         if: startsWith(matrix.os, 'ubuntu')
         run: npx electron-builder --linux deb --x64 --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      # Upload artifacts directly from where electron-builder puts them
+      # Upload artifacts for workflow summary
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-build
           path: |
-            dist/
-            release/
+            dist/**/*.exe
+            dist/**/*.msi
+            dist/**/*.dmg
+            dist/**/*.zip
+            dist/**/*.deb
+            dist/**/*.AppImage
+            release/**/*.exe
+            release/**/*.msi
+            release/**/*.dmg
+            release/**/*.zip
+            release/**/*.deb
+            release/**/*.AppImage
           if-no-files-found: warn
-          
-      # Create GitHub release only if triggered by a tag
-      - name: Release Electron app - Windows
-        if: startsWith(matrix.os, 'windows') && startsWith(github.ref, 'refs/tags/v')
-        uses: samuelmeuli/action-electron-builder@v1
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          release: true
-          
-      - name: Release Electron app - MacOS
-        if: startsWith(matrix.os, 'macos') && startsWith(github.ref, 'refs/tags/v')
-        uses: Yan-Jobs/action-electron-builder@v1.7.0
+          path: release-artifacts
+      
+      # Create release with all artifacts
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
         with:
-          github_token: ${{ secrets.github_token }}
-          release: true
-          
-      - name: Release Electron app - Linux
-        if: startsWith(matrix.os, 'ubuntu') && startsWith(github.ref, 'refs/tags/v')
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          release: true
+          files: |
+            release-artifacts/**/*.exe
+            release-artifacts/**/*.msi
+            release-artifacts/**/*.dmg
+            release-artifacts/**/*.zip
+            release-artifacts/**/*.deb
+            release-artifacts/**/*.AppImage
+          tag_name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_tag }}
+          name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_name }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: false
