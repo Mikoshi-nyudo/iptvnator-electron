@@ -13,7 +13,6 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-      # This prevents one platform failure from canceling other jobs
       fail-fast: false
     steps:
       - name: Check out Git repository
@@ -24,61 +23,50 @@ jobs:
         with:
           node-version: '18'
       
-      # Windows build
+      # Build for all platforms - no upload during this phase
       - name: Build for Windows
         if: startsWith(matrix.os, 'windows')
         run: |
           npm ci
           npm run build
+          mkdir -p ./artifacts
           npx electron-builder --windows --publish never
+          # Move files to artifacts directory
+          mkdir -p ./artifacts
+          xcopy /E /I /Y dist\* artifacts\
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      # Upload Windows artifacts
-      - name: Upload Windows artifacts
-        if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v3
-        with:
-          name: windows-build
-          path: dist/*
-          if-no-files-found: warn
-      
-      # macOS build
       - name: Build for macOS
         if: startsWith(matrix.os, 'macos')
         run: |
           npm ci
           npm run build
           npx electron-builder --mac --publish never
+          # Move files to artifacts directory
+          mkdir -p ./artifacts
+          cp -R dist/* artifacts/ || echo "No files to copy"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      # Upload macOS artifacts
-      - name: Upload macOS artifacts
-        if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v3
-        with:
-          name: macos-build
-          path: dist/*
-          if-no-files-found: warn
-      
-      # Linux build
       - name: Build for Linux
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           npm ci
           npm run build
           npx electron-builder --linux deb --x64 --publish never
+          # Move files to artifacts directory
+          mkdir -p ./artifacts
+          cp -R dist/* artifacts/ || echo "No files to copy"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      # Upload Linux artifacts
-      - name: Upload Linux artifacts
-        if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v3
+      # Solution 1: Use upload-artifact@v4
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: linux-build
-          path: dist/*
+          name: ${{ matrix.os }}-build
+          path: artifacts/
           if-no-files-found: warn
       
       # Create GitHub release only if triggered by a tag
