@@ -17,92 +17,47 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
-      
+
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
-      # Windows build
-      - name: Build for Windows
+
+      # Build for each platform
+      - name: Build app
+        run: |
+          npm ci
+          npm run build
+          
+      # Build and upload artifacts for each platform
+      - name: Build and upload - Windows
         if: startsWith(matrix.os, 'windows')
-        run: |
-          npm ci
-          npm run build
-          # Create artifacts directory only if it doesn't exist
-          if (!(Test-Path -Path "./artifacts")) {
-            mkdir -p ./artifacts
-          }
-          npx electron-builder --windows --publish never
-          # Copy files instead of moving them
-          if (Test-Path -Path "dist") {
-            Get-ChildItem -Path "dist" -Recurse | Copy-Item -Destination "./artifacts" -Force -Recurse
-          }
-          if (Test-Path -Path "release") {
-            Get-ChildItem -Path "release" -Recurse | Copy-Item -Destination "./artifacts" -Force -Recurse
-          }
+        run: npx electron-builder --windows --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # macOS build
-      - name: Build for macOS
+          
+      - name: Build and upload - macOS
         if: startsWith(matrix.os, 'macos')
-        run: |
-          npm ci
-          npm run build
-          # Create artifacts directory safely
-          mkdir -p ./artifacts
-          npx electron-builder --mac --publish never
-          # Copy files to artifacts directory
-          if [ -d "dist" ]; then
-            cp -R dist/* ./artifacts/ || echo "No files in dist to copy"
-          fi
-          if [ -d "release" ]; then
-            cp -R release/* ./artifacts/ || echo "No files in release to copy"
-          fi
+        run: npx electron-builder --mac --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # Linux build
-      - name: Build for Linux
+          
+      - name: Build and upload - Linux
         if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          npm ci
-          npm run build
-          # Create artifacts directory safely
-          mkdir -p ./artifacts
-          npx electron-builder --linux deb --x64 --publish never
-          # Copy files to artifacts directory
-          if [ -d "dist" ]; then
-            cp -R dist/* ./artifacts/ || echo "No files in dist to copy"
-          fi
-          if [ -d "release" ]; then
-            cp -R release/* ./artifacts/ || echo "No files in release to copy"
-          fi
+        run: npx electron-builder --linux deb --x64 --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # List directory contents for debugging
-      - name: List artifacts directory
-        run: |
-          echo "Contents of artifacts directory:"
-          if [ -d "./artifacts" ]; then
-            ls -la ./artifacts/
-          elif (Test-Path -Path "./artifacts") {
-            Get-ChildItem -Path "./artifacts" -Recurse
-          else
-            echo "Artifacts directory not found"
-          fi
-        shell: bash
-      
-      # Upload artifacts using v4
-      - name: Upload build artifacts
+          
+      # Upload artifacts directly from where electron-builder puts them
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-build
-          path: ./artifacts/
+          path: |
+            dist/
+            release/
           if-no-files-found: warn
-      
+          
       # Create GitHub release only if triggered by a tag
       - name: Release Electron app - Windows
         if: startsWith(matrix.os, 'windows') && startsWith(github.ref, 'refs/tags/v')
