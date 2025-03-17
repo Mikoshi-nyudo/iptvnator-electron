@@ -23,50 +23,84 @@ jobs:
         with:
           node-version: '18'
       
-      # Build for all platforms - no upload during this phase
+      # Windows build
       - name: Build for Windows
         if: startsWith(matrix.os, 'windows')
         run: |
           npm ci
           npm run build
-          mkdir -p ./artifacts
+          # Create artifacts directory only if it doesn't exist
+          if (!(Test-Path -Path "./artifacts")) {
+            mkdir -p ./artifacts
+          }
           npx electron-builder --windows --publish never
-          # Move files to artifacts directory
-          mkdir -p ./artifacts
-          xcopy /E /I /Y dist\* artifacts\
+          # Copy files instead of moving them
+          if (Test-Path -Path "dist") {
+            Get-ChildItem -Path "dist" -Recurse | Copy-Item -Destination "./artifacts" -Force -Recurse
+          }
+          if (Test-Path -Path "release") {
+            Get-ChildItem -Path "release" -Recurse | Copy-Item -Destination "./artifacts" -Force -Recurse
+          }
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
+      # macOS build
       - name: Build for macOS
         if: startsWith(matrix.os, 'macos')
         run: |
           npm ci
           npm run build
-          npx electron-builder --mac --publish never
-          # Move files to artifacts directory
+          # Create artifacts directory safely
           mkdir -p ./artifacts
-          cp -R dist/* artifacts/ || echo "No files to copy"
+          npx electron-builder --mac --publish never
+          # Copy files to artifacts directory
+          if [ -d "dist" ]; then
+            cp -R dist/* ./artifacts/ || echo "No files in dist to copy"
+          fi
+          if [ -d "release" ]; then
+            cp -R release/* ./artifacts/ || echo "No files in release to copy"
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
+      # Linux build
       - name: Build for Linux
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           npm ci
           npm run build
-          npx electron-builder --linux deb --x64 --publish never
-          # Move files to artifacts directory
+          # Create artifacts directory safely
           mkdir -p ./artifacts
-          cp -R dist/* artifacts/ || echo "No files to copy"
+          npx electron-builder --linux deb --x64 --publish never
+          # Copy files to artifacts directory
+          if [ -d "dist" ]; then
+            cp -R dist/* ./artifacts/ || echo "No files in dist to copy"
+          fi
+          if [ -d "release" ]; then
+            cp -R release/* ./artifacts/ || echo "No files in release to copy"
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      # Solution 1: Use upload-artifact@v4
+      # List directory contents for debugging
+      - name: List artifacts directory
+        run: |
+          echo "Contents of artifacts directory:"
+          if [ -d "./artifacts" ]; then
+            ls -la ./artifacts/
+          elif (Test-Path -Path "./artifacts") {
+            Get-ChildItem -Path "./artifacts" -Recurse
+          else
+            echo "Artifacts directory not found"
+          fi
+        shell: bash
+      
+      # Upload artifacts using v4
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-build
-          path: artifacts/
+          path: ./artifacts/
           if-no-files-found: warn
       
       # Create GitHub release only if triggered by a tag
