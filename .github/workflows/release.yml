@@ -39,26 +39,26 @@ jobs:
           npm ci
           npm run build
           
-      # Build for each platform with specific configurations
-      - name: Build - Windows
+      # Build for each platform
+      - name: Build for Windows
         if: startsWith(matrix.os, 'windows')
         run: npx electron-builder --windows --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Build - macOS
+      - name: Build for macOS
         if: startsWith(matrix.os, 'macos')
         run: npx electron-builder --mac --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Build - Linux
+      - name: Build for Linux
         if: startsWith(matrix.os, 'ubuntu')
         run: npx electron-builder --linux deb --x64 --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      # Upload artifacts for workflow summary
+      
+      # Upload artifacts for easy access
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -77,28 +77,49 @@ jobs:
             release/**/*.deb
             release/**/*.AppImage
           if-no-files-found: warn
-
-  create-release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: release-artifacts
       
-      # Create release with all artifacts
-      - name: Create GitHub Release
+      # Windows-specific release
+      - name: Create GitHub Release - Windows
+        if: startsWith(matrix.os, 'windows')
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            release-artifacts/**/*.exe
-            release-artifacts/**/*.msi
-            release-artifacts/**/*.dmg
-            release-artifacts/**/*.zip
-            release-artifacts/**/*.deb
-            release-artifacts/**/*.AppImage
+            release/**/*.exe
+            release/**/*.msi
+            dist/**/*.exe
+            dist/**/*.msi
+          tag_name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_tag }}
+          name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_name }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: false
+      
+      # macOS-specific release
+      - name: Create GitHub Release - macOS
+        if: startsWith(matrix.os, 'macos')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/**/*.dmg
+            dist/**/*.zip
+            release/**/*.dmg
+            release/**/*.zip
+          tag_name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_tag }}
+          name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_name }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: false
+      
+      # Linux-specific release
+      - name: Create GitHub Release - Linux
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/**/*.deb
+            dist/**/*.AppImage
+            release/**/*.deb
+            release/**/*.AppImage
           tag_name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_tag }}
           name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_name }}
           draft: false
