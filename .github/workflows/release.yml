@@ -13,6 +13,8 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
+      # This prevents one platform failure from canceling other jobs
+      fail-fast: false
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
@@ -22,18 +24,8 @@ jobs:
         with:
           node-version: '18'
       
-      - name: Package Linux
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          npm ci
-          npm run build
-          # Build only the .deb package for Linux
-          npx electron-builder --linux deb --x64 --publish never
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
       # Windows build
-      - name: Build Electron app - Windows
+      - name: Build for Windows
         if: startsWith(matrix.os, 'windows')
         run: |
           npm ci
@@ -42,8 +34,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
+      # Upload Windows artifacts
+      - name: Upload Windows artifacts
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: dist/*
+          if-no-files-found: warn
+      
       # macOS build
-      - name: Build Electron app - MacOS
+      - name: Build for macOS
         if: startsWith(matrix.os, 'macos')
         run: |
           npm ci
@@ -52,38 +53,52 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      # Upload artifacts for all platforms
-      - name: Upload artifacts
+      # Upload macOS artifacts
+      - name: Upload macOS artifacts
+        if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-build
-          path: |
-            dist/*.exe
-            dist/*.dmg
-            dist/*.deb
-            dist/*.AppImage
-            dist/*.snap
-            dist/*.yml
-          if-no-files-found: ignore
+          name: macos-build
+          path: dist/*
+          if-no-files-found: warn
+      
+      # Linux build
+      - name: Build for Linux
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          npm ci
+          npm run build
+          npx electron-builder --linux deb --x64 --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Upload Linux artifacts
+      - name: Upload Linux artifacts
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-build
+          path: dist/*
+          if-no-files-found: warn
       
       # Create GitHub release only if triggered by a tag
       - name: Release Electron app - Windows
-        uses: samuelmeuli/action-electron-builder@v1
         if: startsWith(matrix.os, 'windows') && startsWith(github.ref, 'refs/tags/v')
+        uses: samuelmeuli/action-electron-builder@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           release: true
           
       - name: Release Electron app - MacOS
-        uses: Yan-Jobs/action-electron-builder@v1.7.0
         if: startsWith(matrix.os, 'macos') && startsWith(github.ref, 'refs/tags/v')
+        uses: Yan-Jobs/action-electron-builder@v1.7.0
         with:
           github_token: ${{ secrets.github_token }}
           release: true
           
       - name: Release Electron app - Linux
-        uses: samuelmeuli/action-electron-builder@v1
         if: startsWith(matrix.os, 'ubuntu') && startsWith(github.ref, 'refs/tags/v')
+        uses: samuelmeuli/action-electron-builder@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           release: true
