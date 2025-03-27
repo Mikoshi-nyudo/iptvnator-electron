@@ -43,7 +43,7 @@ import { WebPlayerViewComponent } from '../web-player-view/web-player-view.compo
 })
 export class LiveStreamLayoutComponent {
     @Input({ required: true }) channels: XtreamItem[];
-    @Input({ required: true }) player: VideoPlayer = VideoPlayer.JWPlayer;
+    @Input({ required: true }) player: VideoPlayer = VideoPlayer.ArtPlayer;
     @Input() epgItems: EpgItem[];
     @Input() streamUrl: string;
 

@@ -58,7 +58,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
     /** Selected video player options */
     playerSettings: Partial<Settings> = {
-        player: VideoPlayer.JWPlayer,
+        player: VideoPlayer.ArtPlayer,
         showCaptions: false,
     };
 
@@ -202,7 +202,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
         this.storage.get(STORE_KEY.Settings).subscribe((settings: Settings) => {
             if (settings && Object.keys(settings).length > 0) {
                 this.playerSettings = {
-                    player: settings.player || VideoPlayer.JWPlayer,
+                    player: settings.player || VideoPlayer.ArtPlayer,
                     showCaptions: settings.showCaptions || false,
                 };
             }

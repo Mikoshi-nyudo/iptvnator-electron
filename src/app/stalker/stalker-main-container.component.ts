@@ -370,7 +370,7 @@ export class StalkerMainContainerComponent implements OnInit {
     }
 
     openPlayer(streamUrl: string) {
-        const player = this.settings()?.player ?? VideoPlayer.JWPlayer;
+        const player = this.settings()?.player ?? VideoPlayer.ArtPlayer;
         if (player === VideoPlayer.MPV) {
             if (!this.hideExternalInfoDialog())
                 this.dialog.open(ExternalPlayerInfoDialogComponent);

@@ -87,18 +87,18 @@ export class SettingsComponent implements OnInit {
             id: VideoPlayer.VideoJs,
             label: 'VideoJs Player',
         },
-        {
+      /*  {
             id: VideoPlayer.JWPlayer,
             label: 'JW Player',
-        },
+        }, */
         {
             id: VideoPlayer.ShakaPlayer,
             label: 'Shaka Player',
         },
-        {
+      /*  {
             id: VideoPlayer.ClapprPlayer,
             label: 'Clappr Player',
-        },
+        }, */
         {
             id: VideoPlayer.ArtPlayer,
             label: 'Art Player',
@@ -131,7 +131,7 @@ export class SettingsComponent implements OnInit {
 
     /** Settings form object */
     settingsForm = this.formBuilder.group({
-        player: [VideoPlayer.JWPlayer],
+        player: [VideoPlayer.ArtPlayer],
         ...(this.isElectron ? { epgUrl: new FormArray([]) } : {}),
         language: Language.ENGLISH,
         showCaptions: false,
@@ -181,7 +181,7 @@ export class SettingsComponent implements OnInit {
                         this.settingsForm.setValue({
                             player: settings.player
                                 ? settings.player
-                                : VideoPlayer.JWPlayer,
+                                : VideoPlayer.ArtPlayer,
                             ...(this.isElectron ? { epgUrl: [] } : {}),
                             language: settings.language ?? Language.ENGLISH,
                             showCaptions: settings.showCaptions ?? false,
@@ -244,7 +244,7 @@ export class SettingsComponent implements OnInit {
                 ) as string
             }: ${currentVersion}`;
         } else {
-            this.updateMessage = '@pigzillaaaaa';
+            this.updateMessage = '@Mikoshi-nyudo';
         }
     }
 

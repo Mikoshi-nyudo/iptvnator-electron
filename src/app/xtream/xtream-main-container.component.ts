@@ -349,7 +349,7 @@ export class XtreamMainContainerComponent implements OnInit {
     }
 
     openPlayer(streamUrl: string, title: string) {
-        this.player = this.settings()?.player ?? VideoPlayer.JWPlayer;
+        this.player = this.settings()?.player ?? VideoPlayer.ArtPlayer;
         if (this.player === VideoPlayer.MPV) {
             if (!this.hideExternalInfoDialog())
                 this.dialog.open(ExternalPlayerInfoDialogComponent);

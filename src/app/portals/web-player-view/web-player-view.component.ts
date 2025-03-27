@@ -39,7 +39,7 @@ export class WebPlayerViewComponent {
     constructor() {
         effect(
             () => {
-                this.player = this.settings()?.player ?? VideoPlayer.JWPlayer;
+                this.player = this.settings()?.player ?? VideoPlayer.ArtPlayer;
 
                 this.setChannel(this.streamUrl());
                 this.setVjsOptions(this.streamUrl());
