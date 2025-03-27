@@ -2,7 +2,7 @@
     "name": "iptvnator",
     "version": "0.16.4",
     "description": "IPTV player application.",
-    "homepage": "https://github.com/pigzillaaaaa/iptvnator-electron",
+    "homepage": "https://github.com/Mikoshi-nyudo/iptvnator-electron",
     "author": {
         "name": "4gray",
         "email": "dev@artslab.info"
@@ -68,7 +68,7 @@
         "@videojs/http-streaming": "2.15.0",
         "@yangkghjh/videojs-aspect-ratio-panel": "0.0.1",
         "about-window": "1.15.2",
-        "artplayer": "5.2.1",
+        "artplayer": "5.2.2",
         "artplayer-plugin-dash-control": "1.0.0",
         "artplayer-plugin-hls-control": "1.0.1",
         "axios": "1.6.2",
