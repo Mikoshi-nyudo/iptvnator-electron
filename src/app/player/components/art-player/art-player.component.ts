@@ -359,6 +359,23 @@ export class ArtPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
         this.options = {
           ...this.options,
+          settings: [
+            {
+              html: 'Subtitle',
+              tooltip: 'Subtitle',
+              icon: '<img width="22" height="22" src="./assets/images/subtitle.svg">',
+              switch: true,
+              onSwitch: (item) => {
+                if (this.player && this.player.hls) {
+                  const nextState = !item.switch;
+                  this.player.hls.subtitleTrack = nextState ? 0 : -1;
+                  item.tooltip = nextState ? 'Open' : 'Close';
+                  return nextState;
+                }
+                return false;
+              },
+            },
+          ],
           plugins: [
             artplayerPluginHlsControl({
                 quality: {
