@@ -9,8 +9,7 @@
 
 The application is a cross-platform, open-source project built with Electron and Angular. This build version supports DRM and H.265 (hevc) playback, and includes additional video player components; Shaka player and Artplayer. 
 
-⚠️ Note: IPTVnator does not provide any playlists or other digital content. The channels and pictures in the screenshots are for demonstration purposes only.
-
+⚠️ Note: IPTVnator does not provide any playlists or other digital content.
 
 ## Features
 
