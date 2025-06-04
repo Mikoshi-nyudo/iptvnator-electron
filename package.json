@@ -1,6 +1,6 @@
 {
     "name": "iptvnator",
-    "version": "0.16.6",
+    "version": "0.16.7",
     "description": "IPTV player application.",
     "homepage": "https://github.com/Mikoshi-nyudo/iptvnator-electron",
     "author": {
@@ -79,7 +79,7 @@
         "electron-store": "8.1.0",
         "epg-parser": "0.1.6",
         "fix-path": "3.0.0",
-        "hls.js": "1.6.0",
+        "hls.js": "1.6.5",
         "iptv-playlist-parser": "github:Mikoshi-nyudo/iptv-playlist-parser",
         "lodash": "4.17.21",
         "moment": "2.30.1",
