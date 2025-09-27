@@ -1,0 +1,127 @@
+name: Release Wider Sidebar
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g., v1.0.0-wider)'
+        required: true
+        default: 'v0.0.0-wider'
+      release_name:
+        description: 'Release name'
+        required: false
+        default: 'Manual Wider Sidebar Release'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+      fail-fast: false
+    steps:
+      - name: Checkout Wider Sidebar branch
+        uses: actions/checkout@v4
+        with:
+          ref: wider-sidebar
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # Build for each platform
+      - name: Build app
+        run: |
+          npm ci
+          npm run build
+          
+      # Build for each platform
+      - name: Build for Windows
+        if: startsWith(matrix.os, 'windows')
+        run: npx electron-builder --windows --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Build for macOS
+        if: startsWith(matrix.os, 'macos')
+        run: npx electron-builder --mac --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Build for Linux
+        if: startsWith(matrix.os, 'ubuntu')
+        run: npx electron-builder --linux deb --x64 --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Upload artifacts for easy access
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-build
+          path: |
+            dist/**/*.exe
+            dist/**/*.msi
+            dist/**/*.dmg
+            dist/**/*.zip
+            dist/**/*.deb
+            dist/**/*.AppImage
+            release/**/*.exe
+            release/**/*.msi
+            release/**/*.dmg
+            release/**/*.zip
+            release/**/*.deb
+            release/**/*.AppImage
+          if-no-files-found: warn
+      
+      # Windows-specific release
+      - name: Create GitHub Release - Windows
+        if: startsWith(matrix.os, 'windows')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release/**/*.exe
+            release/**/*.msi
+            dist/**/*.exe
+            dist/**/*.msi
+          tag_name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_tag }}
+          name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_name }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: false
+      
+      # macOS-specific release
+      - name: Create GitHub Release - macOS
+        if: startsWith(matrix.os, 'macos')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/**/*.dmg
+            dist/**/*.zip
+            release/**/*.dmg
+            release/**/*.zip
+          tag_name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_tag }}
+          name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_name }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: false
+      
+      # Linux-specific release
+      - name: Create GitHub Release - Linux
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/**/*.deb
+            dist/**/*.AppImage
+            release/**/*.deb
+            release/**/*.AppImage
+          tag_name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_tag }}
+          name: ${{ github.event_name == 'create' && github.ref_name || github.event.inputs.release_name }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: false
